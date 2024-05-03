@@ -1,15 +1,69 @@
-// Complete the Index page component here
-// Use chakra-ui
-import { Button } from "@chakra-ui/react"; // example
-import { FaPlus } from "react-icons/fa"; // example - use react-icons/fa for icons
+import { useState } from 'react';
+import { Box, Input, Button, List, ListItem, ListIcon, IconButton, useToast } from '@chakra-ui/react';
+import { FaTrash, FaCheckCircle } from 'react-icons/fa';
 
 const Index = () => {
-  // TODO: Create the website here!
+  const [tasks, setTasks] = useState([]);
+  const [input, setInput] = useState('');
+  const toast = useToast();
+
+  const addTask = () => {
+    if (input.trim() === '') {
+      toast({
+        title: 'No task entered.',
+        description: "Please enter a task before adding.",
+        status: 'warning',
+        duration: 2000,
+        isClosable: true,
+      });
+      return;
+    }
+    setTasks([...tasks, { id: Date.now(), text: input, isCompleted: false }]);
+    setInput('');
+  };
+
+  const deleteTask = (id) => {
+    setTasks(tasks.filter(task => task.id !== id));
+  };
+
+  const toggleTaskCompletion = (id) => {
+    setTasks(tasks.map(task => task.id === id ? { ...task, isCompleted: !task.isCompleted } : task));
+  };
+
   return (
-    <Button>
-      Hello world! <FaPlus />
-    </Button>
-  ); // example
+    <Box p={4} maxW="md" mx="auto">
+      <Input
+        placeholder="Add a new task..."
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyPress={(e) => e.key === 'Enter' && addTask()}
+        mb={4}
+      />
+      <Button onClick={addTask} colorScheme="blue" mb={4}>Add Task</Button>
+      <List spacing={3}>
+        {tasks.map(task => (
+          <ListItem key={task.id} d="flex" justifyContent="space-between" alignItems="center">
+            <Box as={task.isCompleted ? 's' : 'span'}>{task.text}</Box>
+            <Box>
+              <IconButton
+                icon={<FaCheckCircle />}
+                onClick={() => toggleTaskCompletion(task.id)}
+                colorScheme={task.isCompleted ? "green" : "gray"}
+                aria-label="Complete task"
+                mr={2}
+              />
+              <IconButton
+                icon={<FaTrash />}
+                onClick={() => deleteTask(task.id)}
+                colorScheme="red"
+                aria-label="Delete task"
+              />
+            </Box>
+          </ListItem>
+        ))}
+      </List>
+    </Box>
+  );
 };
 
 export default Index;
